@@ -23,7 +23,7 @@ reports a missing dependency and asks before installing it.
 ## Activation
 
 The first KING invocation opens the secure activation page at
-`https://king.juziai.net`. Enter a valid monthly or permanent redemption code
+`https://lmaigc.com`. Enter a valid monthly or permanent redemption code
 there. Redemption codes never need to be pasted into a Codex conversation.
 
 - A monthly license lasts 30 days from its first successful redemption.
