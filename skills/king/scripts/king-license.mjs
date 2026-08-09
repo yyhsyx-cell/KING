@@ -627,6 +627,24 @@ async function fetchJson(url, options = {}) {
   return { body, status: response.status };
 }
 
+async function retrySafeNetwork(operation, attempts = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (!(error instanceof KingClientError) || error.code !== "network_unavailable") {
+        throw error;
+      }
+      if (attempt < attempts) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 300));
+      }
+    }
+  }
+  throw lastError;
+}
+
 function refreshProofMessage(licenseId, timestamp, nonce) {
   return Buffer.from(`KING-REFRESH\n${licenseId}\n${timestamp}\n${nonce}`, "utf8");
 }
@@ -905,15 +923,17 @@ async function commandActivate(options, paths) {
     );
   }
   const device = await ensureDevice(paths);
-  const { body } = await fetchJson(`${config.server_url}/v1/activations/start`, {
-    method: "POST",
-    body: JSON.stringify({
-      installation_id: device.installation_id,
-      installation_public_key: device.public_key_pem,
-      installation_fingerprint: device.fingerprint,
-      client_version: CLIENT_VERSION,
+  const { body } = await retrySafeNetwork(() =>
+    fetchJson(`${config.server_url}/v1/activations/start`, {
+      method: "POST",
+      body: JSON.stringify({
+        installation_id: device.installation_id,
+        installation_public_key: device.public_key_pem,
+        installation_fingerprint: device.fingerprint,
+        client_version: CLIENT_VERSION,
+      }),
     }),
-  });
+  );
   if (
     typeof body?.activation_id !== "string" ||
     typeof body?.activation_url !== "string" ||
@@ -1117,10 +1137,12 @@ async function commandAdminOpen(paths) {
       "KING license server is not configured.",
     );
   }
-  const { body } = await adminRequest(config, "/v1/admin/sessions/start", {
-    method: "POST",
-    body: JSON.stringify({}),
-  });
+  const { body } = await retrySafeNetwork(() =>
+    adminRequest(config, "/v1/admin/sessions/start", {
+      method: "POST",
+      body: JSON.stringify({}),
+    }),
+  );
   if (
     typeof body?.login_url !== "string" ||
     !Number.isFinite(Date.parse(body?.expires_at))
