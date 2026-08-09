@@ -11,8 +11,9 @@ capabilities and supplied no additional functional wrapper.
 
 ## Start
 
-Use `scripts/king-license` on macOS and `scripts\king-license.cmd` on Windows
-for every helper command below.
+Use `sh scripts/king-license` on macOS and `scripts\king-license.cmd` on
+Windows for every helper command below. The macOS helper restores the bundled
+native helpers' owner-only executable permission after a GitHub download.
 
 1. Run the license helper with `dependencies --json` from this skill directory.
    Continue only when it reports `ready`.
@@ -26,7 +27,8 @@ for every helper command below.
    - If a dependency is disabled, report only the disabled item and ask the
      user to enable it, restart Codex, and invoke KING again.
    - Do not imitate or silently replace a missing or disabled capability.
-3. Run `scripts/king-license status --json` from this skill directory.
+3. Run the platform-appropriate helper with `status --json` from this skill
+   directory.
 4. Follow the returned machine-readable status:
    - `active` or `offline_grace`: continue. Mention the offline warning only
      for `offline_grace`.
@@ -56,7 +58,8 @@ for every helper command below.
 
 - Never invent or validate redemption codes with model-generated randomness.
 - Only issue codes through
-  `scripts/king-license admin issue --plan <month|permanent> --count <N> --json`.
+  `sh scripts/king-license admin issue --plan <month|permanent> --count <N> --json`
+  on macOS, or the equivalent `.cmd` command on Windows.
 - Require the server-side administrator credential from the operating system's
   protected credential store.
 - Save newly issued codes to the owner-only file created by the helper and

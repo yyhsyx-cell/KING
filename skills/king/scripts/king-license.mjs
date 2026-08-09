@@ -209,12 +209,29 @@ function runProcess(command, args, { input, env = process.env } = {}) {
   });
 }
 
+export async function runBundledMacHelper(helperPath, args, options = {}) {
+  try {
+    await chmod(helperPath, 0o700);
+  } catch (error) {
+    throw new KingClientError(
+      "helper_unavailable",
+      `KING could not prepare its bundled macOS helper: ${path.basename(helperPath)}`,
+      { cause: error },
+    );
+  }
+  return runProcess(helperPath, args, options);
+}
+
 async function keychainGet(service, account) {
   try {
     const result =
       process.platform === "win32"
         ? await runWindowsHelper("credential-get", [service, account])
-        : await runProcess(KEYCHAIN_HELPER_PATH, ["get", service, account]);
+        : await runBundledMacHelper(KEYCHAIN_HELPER_PATH, [
+            "get",
+            service,
+            account,
+          ]);
     const encoded = result.stdout.trim();
     if (!/^[A-Za-z0-9+/]+={0,2}$/.test(encoded)) {
       throw new KingClientError(
@@ -242,7 +259,7 @@ async function keychainSet(service, account, secret) {
     if (process.platform === "win32") {
       await runWindowsHelper("credential-set", [service, account], { input });
     } else {
-      await runProcess(KEYCHAIN_HELPER_PATH, ["set", service, account], {
+      await runBundledMacHelper(KEYCHAIN_HELPER_PATH, ["set", service, account], {
         input,
       });
     }
@@ -835,7 +852,7 @@ async function openActivationUrl(activationUrl) {
     if (process.platform === "win32") {
       await runWindowsHelper("open-url", [], { input });
     } else {
-      await runProcess(OPEN_HELPER_PATH, [], { input });
+      await runBundledMacHelper(OPEN_HELPER_PATH, [], { input });
     }
   } catch (error) {
     throw new KingClientError(
