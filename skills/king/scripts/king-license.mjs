@@ -11,7 +11,15 @@ import {
   verify,
 } from "node:crypto";
 import { spawn } from "node:child_process";
-import { chmod, mkdir, open, readFile, rename, unlink } from "node:fs/promises";
+import {
+  chmod,
+  mkdir,
+  open,
+  readFile,
+  realpath,
+  rename,
+  unlink,
+} from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -1241,6 +1249,15 @@ async function main() {
   }
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(SCRIPT_PATH)) {
+export async function isMainScript(candidatePath = process.argv[1]) {
+  if (!candidatePath) return false;
+  try {
+    return (await realpath(candidatePath)) === (await realpath(SCRIPT_PATH));
+  } catch {
+    return path.resolve(candidatePath) === path.resolve(SCRIPT_PATH);
+  }
+}
+
+if (await isMainScript()) {
   await main();
 }
