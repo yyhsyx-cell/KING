@@ -57,6 +57,10 @@ native helpers' owner-only executable permission after a GitHub download.
 ## Owner-only code issuing
 
 - Never invent or validate redemption codes with model-generated randomness.
+- When the owner asks to open or manage the authorization backend, run
+  `sh scripts/king-license admin open --json` on macOS, or the equivalent
+  `.cmd` command on Windows. Return only the safe completion message; never
+  expose the one-time login URL or administrator token.
 - Only issue codes through
   `sh scripts/king-license admin issue --plan <month|permanent> --count <N> --json`
   on macOS, or the equivalent `.cmd` command on Windows.

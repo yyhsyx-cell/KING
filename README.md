@@ -26,6 +26,11 @@ The first KING invocation opens the secure activation page at
 `https://lmaigc.com`. Enter a valid monthly or permanent redemption code
 there. Redemption codes never need to be pasted into a Codex conversation.
 
+The owner can open the protected management console with
+`sh scripts/king-license admin open --json`. The console generates and
+downloads new codes and manages device resets and revocations without putting
+the administrator token into Codex or the browser address.
+
 - A monthly license lasts 30 days from its first successful redemption.
 - A permanent license has no subscription expiration.
 - Both periodically refresh revocation status and allow at most 72 hours of

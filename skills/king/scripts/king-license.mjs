@@ -854,6 +854,25 @@ function assertActivationUrl(activationUrl, serverUrl, activationId) {
   return activation.toString();
 }
 
+export function assertAdminLoginUrl(loginUrl, serverUrl) {
+  const login = new URL(loginUrl);
+  const server = new URL(serverUrl);
+  if (
+    login.origin !== server.origin ||
+    login.username ||
+    login.password ||
+    login.search ||
+    login.pathname !== "/admin" ||
+    !/^#[A-Za-z0-9_-]{32,256}$/.test(login.hash)
+  ) {
+    throw new KingClientError(
+      "invalid_admin_login_url",
+      "KING server returned an unsafe administrator login URL.",
+    );
+  }
+  return login.toString();
+}
+
 async function openActivationUrl(activationUrl) {
   try {
     const input = `${Buffer.from(activationUrl, "utf8").toString("base64")}\n`;
@@ -1090,6 +1109,37 @@ async function adminRequest(config, route, options = {}) {
   });
 }
 
+async function commandAdminOpen(paths) {
+  const config = await loadConfig(paths);
+  if (!config) {
+    throw new KingClientError(
+      "configuration_required",
+      "KING license server is not configured.",
+    );
+  }
+  const { body } = await adminRequest(config, "/v1/admin/sessions/start", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+  if (
+    typeof body?.login_url !== "string" ||
+    !Number.isFinite(Date.parse(body?.expires_at))
+  ) {
+    throw new KingClientError(
+      "invalid_server_response",
+      "KING server returned invalid administrator login data.",
+    );
+  }
+  const loginUrl = assertAdminLoginUrl(body.login_url, config.server_url);
+  await openActivationUrl(loginUrl);
+  return {
+    ok: true,
+    status: "admin_opened",
+    opened: true,
+    message: "KING 管理后台已在浏览器打开。",
+  };
+}
+
 async function commandAdminIssue(options, paths) {
   const config = await loadConfig(paths);
   if (!config) {
@@ -1220,6 +1270,7 @@ export async function runCli(argv = process.argv.slice(2), paths = resolvePaths(
       return commandPoll(paths);
     case "admin":
       if (subcommand === "set-token") return commandAdminSetToken(paths);
+      if (subcommand === "open") return commandAdminOpen(paths);
       if (subcommand === "issue") return commandAdminIssue(options, paths);
       if (subcommand === "revoke") {
         return commandAdminLicenseAction("revoke", options, paths);
