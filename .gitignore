@@ -1,0 +1,6 @@
+.DS_Store
+issued/
+config.json
+license.jws
+pending-activation.json
+state.json

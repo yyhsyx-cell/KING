@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+CHATGPT_NODE="/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"
+
+if [ -x "$CHATGPT_NODE" ]; then
+  exec "$CHATGPT_NODE" "$SCRIPT_DIR/king-license.mjs" "$@"
+fi
+
+if command -v node >/dev/null 2>&1; then
+  exec node "$SCRIPT_DIR/king-license.mjs" "$@"
+fi
+
+printf '%s\n' 'KING requires Node.js. Install/update the ChatGPT desktop app and try again.' >&2
+exit 127
