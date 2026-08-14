@@ -4,6 +4,22 @@ set -eu
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 CHATGPT_NODE="/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"
 
+# Codex/ChatGPT browser traffic follows the macOS system proxy, while Node.js
+# does not unless proxy support is enabled explicitly. Mirror the configured
+# HTTPS proxy so activation and refresh use the same working network path.
+if [ "$(uname -s)" = "Darwin" ] && [ -x /usr/sbin/scutil ] && [ -z "${HTTPS_PROXY:-}" ]; then
+  KING_PROXY_SETTINGS=$(/usr/sbin/scutil --proxy)
+  KING_PROXY_ENABLED=$(printf '%s\n' "$KING_PROXY_SETTINGS" | awk '/HTTPSEnable/{print $3; exit}')
+  KING_PROXY_HOST=$(printf '%s\n' "$KING_PROXY_SETTINGS" | awk '/HTTPSProxy/{print $3; exit}')
+  KING_PROXY_PORT=$(printf '%s\n' "$KING_PROXY_SETTINGS" | awk '/HTTPSPort/{print $3; exit}')
+  if [ "$KING_PROXY_ENABLED" = "1" ] && [ -n "$KING_PROXY_HOST" ] && [ -n "$KING_PROXY_PORT" ]; then
+    HTTPS_PROXY="http://$KING_PROXY_HOST:$KING_PROXY_PORT"
+    HTTP_PROXY="$HTTPS_PROXY"
+    NODE_USE_ENV_PROXY=1
+    export HTTPS_PROXY HTTP_PROXY NODE_USE_ENV_PROXY
+  fi
+fi
+
 if [ -x "$CHATGPT_NODE" ]; then
   exec "$CHATGPT_NODE" "$SCRIPT_DIR/king-license.mjs" "$@"
 fi

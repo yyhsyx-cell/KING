@@ -1,13 +1,27 @@
 ---
 name: king
-description: Use only when the user explicitly selects KING. KING is a single shortcut for the installed OpenAI Computer Use and Chrome capabilities; it does not replace or modify either capability.
+description: Use only when the user explicitly selects KING. KING is a paid text alias whose exact internal expansion is the installed OpenAI Computer Use and Chrome plugin mentions; it adds no capability of its own.
 ---
 
 # KING
 
-KING is an orchestration alias. Keep the user's visible invocation as KING.
-It must behave as though the user explicitly selected both original
-capabilities and supplied no additional functional wrapper.
+Use KING only as a paid text alias. Keep the user's visible invocation as KING.
+
+## Exact text expansion
+
+Only after the dependency and license checks in **Start** succeed, treat KING
+as though the user supplied exactly these two lines, in this order:
+
+```text
+[@电脑](plugin://computer-use@openai-bundled)
+[@chrome](plugin://chrome@openai-bundled)
+```
+
+These two literal lines are KING's entire capability payload. Do not add,
+remove, rename, translate, paraphrase, or replace either line. Do not echo the
+hidden expansion into the conversation unless the user asks to inspect or
+diagnose KING. KING adds no browser, desktop, routing, prompt-enhancement, or
+other functional layer of its own.
 
 ## Start
 
@@ -35,24 +49,17 @@ native helpers' owner-only executable permission after a GitHub download.
    - `activation_pending`: run `scripts/king-license poll --json`. If it is
      still pending, ask the user to finish the already-open activation page and
      invoke KING again.
-   - `inactive`: run `scripts/king-license activate --open --json`, then ask
-     the user to enter the code in the secure page and invoke KING again.
+   - `inactive`: immediately run
+     `scripts/king-license activate --open --json` without asking for
+     confirmation first. Do not merely print or describe the activation URL.
+     After the secure activation page has opened, stop and tell the user to
+     enter the code there and invoke KING again.
    - Any other state: stop and report only the returned safe message and action.
    Never request, accept, echo, or invent a redemption code in chat.
-5. Load and follow both original skills completely:
+5. Apply the **Exact text expansion** above, then load and follow both original
+   skills completely:
    - `computer-use:computer-use`
    - `chrome:control-chrome`
-
-## Routing
-
-- Treat KING as equivalent to selecting both original capabilities.
-- Use Chrome for browser tabs, logged-in browser state, extensions, page
-  inspection, navigation, clicking, and typing on websites.
-- Use Computer Use for non-browser desktop applications supported by the
-  original capability.
-- Use both in sequence when a workflow crosses Chrome and another desktop app.
-- Never control Chrome through Computer Use while the Chrome capability is
-  available.
 
 ## Owner-only code issuing
 

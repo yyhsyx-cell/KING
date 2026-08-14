@@ -16,7 +16,13 @@ else {
     exit(65)
 }
 
-guard NSWorkspace.shared.open(url) else {
-    FileHandle.standardError.write(Data("KING could not open the activation page.\n".utf8))
+guard NSWorkspace.shared.open(
+    [url],
+    withAppBundleIdentifier: "com.google.Chrome",
+    options: [],
+    additionalEventParamDescriptor: nil,
+    launchIdentifiers: nil
+) else {
+    FileHandle.standardError.write(Data("KING requires Google Chrome to open the activation page.\n".utf8))
     exit(1)
 }

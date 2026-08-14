@@ -1,14 +1,8 @@
 interface:
   display_name: "KING"
-  short_description: "电脑与 Chrome 原生能力的单一安全快捷入口，按任务自动路由"
+  short_description: "付费激活后，将 KING 展开为电脑与 Chrome 两个原生插件文字"
   default_prompt: "使用 $king 完成这项任务："
   brand_color: "#111111"
 
 policy:
   allow_implicit_invocation: false
-
-dependencies:
-  tools:
-    - type: "mcp"
-      value: "node_repl"
-      description: "Runtime used by the installed OpenAI Chrome and Computer Use capabilities"
