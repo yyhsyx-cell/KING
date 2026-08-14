@@ -853,15 +853,26 @@ async function commandConfigure(options, paths) {
   };
 }
 
-function assertActivationUrl(activationUrl, serverUrl, activationId) {
+export function assertActivationUrl(activationUrl, serverUrl, activationId) {
   const activation = new URL(activationUrl);
   const server = new URL(serverUrl);
+  const validActivationId =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      activationId,
+    );
+  const legacyPath =
+    activation.search === "" &&
+    activation.pathname === `/activate/${activationId}`;
+  const rootEntry =
+    activation.pathname === "/" &&
+    activation.searchParams.size === 1 &&
+    activation.searchParams.get("activation") === activationId;
   if (
+    !validActivationId ||
     activation.origin !== server.origin ||
     activation.username ||
     activation.password ||
-    activation.search ||
-    activation.pathname !== `/activate/${activationId}` ||
+    (!legacyPath && !rootEntry) ||
     !/^#[A-Za-z0-9_-]{32,256}$/.test(activation.hash)
   ) {
     throw new KingClientError(
