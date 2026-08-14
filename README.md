@@ -1,8 +1,16 @@
 # KING
 
-KING is a paid, explicit Codex skill that provides one visible entry for the
-official OpenAI Computer Use and Chrome capabilities. It does not copy or
-replace either capability.
+KING is a paid, explicit Codex text-alias skill. After activation, selecting
+the single visible **KING** entry internally expands to exactly these two
+literal plugin mentions:
+
+```text
+[@电脑](plugin://computer-use@openai-bundled)
+[@chrome](plugin://chrome@openai-bundled)
+```
+
+KING does not copy, replace, route, or add functionality to either original
+OpenAI capability. Its complete capability payload is the two lines above.
 
 ## Install with Codex
 
@@ -13,8 +21,9 @@ Use skill-installer to install skills/king from https://github.com/yyhsyx-cell/K
 ```
 
 After installation, start a new task and select **KING**. The message shows the
-single KING skill entry. KING then checks its license and routes browser work to
-Chrome, desktop-app work to Computer Use, and cross-app work to both.
+single KING skill entry. KING checks its license and, only when the license is
+valid, contributes the exact two-line text expansion shown above. The original
+plugins keep all of their own behavior, permissions, and safety rules.
 
 The official `computer-use@openai-bundled` and
 `chrome@openai-bundled` plugins must already be installed and enabled. KING
